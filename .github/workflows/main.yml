@@ -49,8 +49,8 @@ jobs:
               after = before
               for old, new in methods.items():
                   if file.suffix == ".kt":
-                      definitions[old] += len(re.findall(r"\\bfun\\s+" + old + r"\\s*\\(", before))
-                  after = re.sub(r"\\b" + old + r"(?=\\s*\\()", new, after)
+                      definitions[old] += len(re.findall(r"\bfun\s+" + old + r"\s*\(", before))
+                  after = re.sub(r"\b" + old + r"(?=\s*\()", new, after)
               if after != before:
                   file.write_text(after, encoding="utf-8")
                   print(f"Actualizado: {file}")
