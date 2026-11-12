@@ -30,6 +30,36 @@ jobs:
             exit 1
           fi
 
+      - name: Corregir conflictos de nombres Kotlin del proyecto importado
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          src = Path("optimizador/app/src/main")
+          names = ["UltraLight", "AutoUpdate", "NoAnim", "City", "TextMode", "ServerUrl"]
+          methods = {f"set{name}": f"update{name}" for name in names}
+          files = sorted([*src.rglob("*.kt"), *src.rglob("*.java")])
+          definitions = {name: 0 for name in methods}
+          if not files:
+              raise SystemExit("No se encontraron fuentes Kotlin/Java en el ZIP")
+          for file in files:
+              before = file.read_text(encoding="utf-8")
+              after = before
+              for old, new in methods.items():
+                  if file.suffix == ".kt":
+                      definitions[old] += len(re.findall(r"\\bfun\\s+" + old + r"\\s*\\(", before))
+                  after = re.sub(r"\\b" + old + r"(?=\\s*\\()", new, after)
+              if after != before:
+                  file.write_text(after, encoding="utf-8")
+                  print(f"Actualizado: {file}")
+          missing = [name for name, count in definitions.items() if count == 0]
+          if missing:
+              raise SystemExit("Faltan funciones esperadas: " + ", ".join(missing))
+          print("Colisiones Kotlin corregidas:", ", ".join(methods))
+          PY
+
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
