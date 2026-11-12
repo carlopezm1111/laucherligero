@@ -15,7 +15,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Descomprimir el proyecto
-        run: unzip -q ligero-proyecto-android.zip
+        run: unzip -q 'ligero-proyecto-android (2).zip'
 
       - uses: actions/setup-java@v4
         with:
