@@ -14,8 +14,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Descomprimir el proyecto
-        run: unzip -q 'ligero-proyecto-android (2).zip'
+      - name: Descomprimir el proyecto más reciente
+        shell: bash
+        run: |
+          mapfile -t archivos < <(find . -maxdepth 1 -type f -name 'ligero-proyecto-android*.zip' -printf '%f\n' | sort -V)
+          if (( ${#archivos[@]} == 0 )); then
+            echo "::error::No se encontró ningún archivo ligero-proyecto-android*.zip"
+            exit 1
+          fi
+          archivo="${archivos[${#archivos[@]}-1]}"
+          echo "Proyecto seleccionado: $archivo"
+          unzip -q "$archivo"
+          if [[ ! -d optimizador ]]; then
+            echo "::error::El ZIP no contiene la carpeta optimizador esperada"
+            exit 1
+          fi
 
       - uses: actions/setup-java@v4
         with:
